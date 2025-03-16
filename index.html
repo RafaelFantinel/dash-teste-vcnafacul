@@ -30,7 +30,7 @@
             issuesContainer.innerHTML = "";
 
             issues
-                .filter(issue => issue.labels.some(label => label.name.toLowerCase().includes("front")))
+                .filter(issue => issue.labels.some(label => label.name.toLowerCase().includes("bug")))
                 .forEach(issue => {
                     const issueElement = document.createElement("div");
                     issueElement.className = `issue ${issue.state}`;

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Issues</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .issue { border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .open { background-color: #eaf7ea; }
+        .closed { background-color: #f7eaea; }
+    </style>
+</head>
+<body>
+
+    <h1>Dashboard de Issues (Front)</h1>
+    <div id="issues"></div>
+
+    <script>
+        const repo = "RafaelFantinel/dash-teste";
+        const token = null
+        const apiUrl = `https://api.github.com/repos/${repo}/issues`;
+
+        async function fetchIssues() {
+            const headers = token ? { Authorization: `token ${token}` } : {};
+            const response = await fetch(apiUrl, { headers });
+            const issues = await response.json();
+
+            const issuesContainer = document.getElementById("issues");
+            issuesContainer.innerHTML = "";
+
+            issues
+                .filter(issue => issue.labels.some(label => label.name.toLowerCase().includes("front")))
+                .forEach(issue => {
+                    const issueElement = document.createElement("div");
+                    issueElement.className = `issue ${issue.state}`;
+                    issueElement.innerHTML = `<strong><a href="${issue.html_url}" target="_blank">${issue.title}</a></strong><br>
+                                              Status: ${issue.state.toUpperCase()}`;
+                    issuesContainer.appendChild(issueElement);
+                });
+        }
+
+        fetchIssues();
+    </script>
+
+</body>
+</html>

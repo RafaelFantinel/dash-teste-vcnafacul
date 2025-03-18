@@ -31,7 +31,7 @@
             issuesContainer.innerHTML = "";
 
             issues
-                .filter(issue => issue.labels.some(label => label.name.toLowerCase().includes("UX/UI")))
+                .filter(issue => issue.labels.some(label => label.name.includes("UX/UI")))
                 .forEach(issue => {
                     const issueElement = document.createElement("div");
                     issueElement.className = `issue ${issue.state}`;

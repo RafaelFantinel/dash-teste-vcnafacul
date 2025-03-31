@@ -3,8 +3,8 @@ import { GitHubIssue, Area, IssueType } from './types';
 import { IssueCard } from './components/IssueCard';
 import { Filter } from './components/Filter';
 
-const REPO_OWNER = 'vcnafacul';
-const REPO_NAME = 'ms-simulado';
+const REPO_OWNER = 'RafaelFantinel';
+const REPO_NAME = 'dash-teste';
 
 function App() {
   const [issues, setIssues] = useState<GitHubIssue[]>([]);

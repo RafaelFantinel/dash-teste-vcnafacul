@@ -181,3 +181,34 @@ label {
   padding: 3rem 0;
   color: rgb(107, 114, 128);
 }
+
+.clear-button {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: rgb(156, 163, 175);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: color 0.3s, transform 0.3s;
+}
+
+.clear-button:hover {
+  color: rgb(37, 99, 235);
+  transform: translateY(-50%) scale(1.2);
+}
+
+.clear-button:focus {
+  outline: none;
+}
+
+.search-container {
+  position: relative;
+  width: 100%;
+}
+
+.search-container input {
+  padding-right: 2.5rem;
+}

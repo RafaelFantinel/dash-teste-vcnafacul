@@ -18,18 +18,19 @@
     <main>
       <div class="filters">
         <div class="search-container">
-          <div class="search-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-          </div>
           <input type="text" id="search-input" placeholder="Buscar por título...">
+          <button id="clear-search" class="clear-button" style="display: none;">&times;</button> <!-- Botão de limpar -->
         </div>
         <div class="select-group">
           <div class="select-container">
-            <label for="label-select">Filtro</label>
-            <select id="label-select">
+            <label for="area-select">Área</label>
+            <select id="area-select">
+              <option value="All">All</option>
+            </select>
+          </div>
+          <div class="select-container">
+            <label for="tipo-select">Tipo</label>
+            <select id="tipo-select">
               <option value="All">All</option>
             </select>
           </div>
@@ -48,7 +49,8 @@
       constructor() {
         this.issues = [];
         this.labels = [];
-        this.selectedLabel = 'All';
+        this.selectedArea = 'All';
+        this.selectedTipo = 'All';
         this.titleSearch = '';
         this.init();
       }
@@ -64,16 +66,22 @@
           const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/labels`);
           if (!response.ok) throw new Error('Failed to fetch labels');
           this.labels = await response.json();
-          this.populateLabelFilter();
+          this.populateFilters();
         } catch (err) {
           this.showError(err.message);
         }
       }
 
-      populateLabelFilter() {
-        const labelSelect = document.getElementById('label-select');
-        labelSelect.innerHTML = '<option value="All">All</option>' +
+      populateFilters() {
+        const areaSelect = document.getElementById('area-select');
+        const tipoSelect = document.getElementById('tipo-select');
+
+        areaSelect.innerHTML += '<option value="All">All</option>' +
           this.labels.map(label => `<option value="${label.name}">${label.name}</option>`).join('');
+        
+        const tipoLabels = ['Melhoria', 'Ajuste', 'Bug'];
+        tipoSelect.innerHTML += '<option value="All">All</option>' +
+          tipoLabels.map(tipo => `<option value="${tipo}">${tipo}</option>`).join('');
       }
 
       async fetchIssues() {
@@ -88,28 +96,51 @@
       }
 
       setupEventListeners() {
-        document.getElementById('label-select').addEventListener('change', (e) => {
-          this.selectedLabel = e.target.value;
+        document.getElementById('area-select').addEventListener('change', (e) => {
+          this.selectedArea = e.target.value;
+          this.render();
+        });
+
+        document.getElementById('tipo-select').addEventListener('change', (e) => {
+          this.selectedTipo = e.target.value;
           this.render();
         });
 
         document.getElementById('search-input').addEventListener('input', (e) => {
           this.titleSearch = e.target.value;
           this.render();
+          this.toggleClearButton();
+        });
+
+        document.getElementById('clear-search').addEventListener('click', () => {
+          document.getElementById('search-input').value = '';
+          this.titleSearch = '';
+          this.render();
+          this.toggleClearButton();
         });
       }
 
+      toggleClearButton() {
+        const clearButton = document.getElementById('clear-search');
+        if (this.titleSearch) {
+          clearButton.style.display = 'inline';
+        } else {
+          clearButton.style.display = 'none';
+        }
+      }
+
       getFilteredIssues() {
-        return this.issues.filter((issue) => {
-          const matchesLabel = this.selectedLabel === 'All' || issue.labels.some(label => label.name === this.selectedLabel);
+        return this.issues.filter(issue => {
+          const matchesArea = this.selectedArea === 'All' || issue.labels.some(label => label.name === this.selectedArea);
+          const matchesTipo = this.selectedTipo === 'All' || issue.labels.some(label => label.name === this.selectedTipo);
           const matchesTitle = this.titleSearch.length < 3 || issue.title.toLowerCase().includes(this.titleSearch.toLowerCase());
-          return matchesLabel && matchesTitle;
+          return matchesArea && matchesTipo && matchesTitle;
         });
       }
 
       showError(message) {
-        document.getElementById('app').innerHTML = `
-          <div style="min-height: 100vh; background-color: rgb(249, 250, 251); display: flex; align-items: center; justify-content: center;">
+        document.getElementById('app').innerHTML = 
+          `<div style="min-height: 100vh; background-color: rgb(249, 250, 251); display: flex; align-items: center; justify-content: center;">
             <div style="text-align: center; color: rgb(220, 38, 38);">
               <p style="font-size: 1.25rem; font-weight: 600;">Error: ${message}</p>
               <button
@@ -119,8 +150,7 @@
                 Retry
               </button>
             </div>
-          </div>
-        `;
+          </div>`;
       }
 
       render() {
@@ -128,8 +158,8 @@
         const issuesContainer = document.getElementById('issues-container');
         
         issuesContainer.innerHTML = filteredIssues.length
-          ? filteredIssues.map(issue => `
-              <div class="issue-card">
+          ? filteredIssues.map(issue => 
+              `<div class="issue-card">
                 <div class="issue-header">
                   <h3 class="issue-title">${issue.title}</h3>
                   <a href="${issue.html_url}" target="_blank" rel="noopener noreferrer" class="external-link">
@@ -143,8 +173,8 @@
                 <div class="issue-labels">
                   ${issue.labels.map(label => `<button style="background-color: #${label.color}; color: white; border: none; padding: 5px 10px; margin: 3px; border-radius: 5px; cursor: default;">${label.name}</button>`).join('')}
                 </div>
-              </div>
-            `).join('')
+              </div>`
+            ).join('')
           : `<div class="empty-state">Nenhuma issue encontrada com os filtros selecionados.</div>`;
       }
     }
